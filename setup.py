@@ -23,6 +23,7 @@ setup(
     url=about['__url__'],
 
     platforms=['darwin'],
+    packages=[NAME],
     ext_modules=[Extension('_' + NAME, ['%s/_%s.c' % (NAME, NAME)])],
 
     package_data={'': ['LICENSE']},

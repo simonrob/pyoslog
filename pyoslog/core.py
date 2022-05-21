@@ -16,7 +16,7 @@ def os_log_create(subsystem, category):
 
 def os_log_with_type(log_object, log_type, *message):
     """Sends a message at a specific logging level, such as default, info, debug, error, or fault, to the logging
-    system. See: https://developer.apple.com/documentation/os/os_log_with_type """
+    system. See: https://developer.apple.com/documentation/os/os_log_with_type"""
     return _pyoslog.os_log_with_type(log_object, log_type, ' '.join(map(str, message)))
 
 

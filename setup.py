@@ -1,4 +1,3 @@
-import importlib.util
 import os
 
 from setuptools import setup, Extension
@@ -13,12 +12,22 @@ with open(os.path.join(working_directory, '__version__.py')) as version_file:
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-# see compatibility.py - allow installation on older versions but provide is_supported() at runtime
-spec = importlib.util.spec_from_file_location('compatibility', os.path.join(working_directory, 'compatibility.py'))
-compatibility = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(compatibility)
+# see compatibility.py - allow installation on older versions (or other OSs) but provide is_supported() at runtime
+compatibility_module_name = 'compatibility'
+compatibility_module_path = os.path.join(working_directory, '%s.py' % compatibility_module_name)
+try:
+    # noinspection PyUnresolvedReferences
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(compatibility_module_name, compatibility_module_path)
+    compatibility = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(compatibility)
+except ImportError:
+    import imp
+
+    compatibility = imp.load_source(compatibility_module_name, compatibility_module_path)
+
 ext_modules = []
-# noinspection PyUnresolvedReferences
 if compatibility.is_supported():
     ext_modules.append(Extension('_' + NAME, ['%s/_%s.c' % (NAME, NAME)]))
 

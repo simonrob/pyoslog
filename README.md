@@ -15,8 +15,8 @@ Install using `pip`:
 python -m pip install pyoslog
 ```
 
-The module will install and import without error on earlier macOS versions.
-Use `pyoslog.is_supported()` if you need to support old macOS versions and want to know at runtime whether to use pyoslog.
+The module will install and import without error on earlier macOS versions (and on unsupported Operating Systems and Python versions).
+Use `pyoslog.is_supported()` if you need to support old macOS versions or other environments and want to know at runtime whether to use pyoslog.
 Please note that if `is_supported()` returns `False` then none of the module's other methods or constants will exist.
 
 
@@ -92,4 +92,4 @@ A `log.h` binding is on that project's [roadmap](https://github.com/ronaldoussor
 
 
 ## License
-[Apache 2.0](LICENSE)
+[Apache 2.0](https://github.com/simonrob/pyoslog/blob/main/LICENSE)

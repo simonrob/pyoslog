@@ -1,6 +1,7 @@
 import _pyoslog
 
 OS_LOG_DEFAULT = _pyoslog.OS_LOG_DEFAULT
+OS_LOG_DISABLED = None
 
 OS_LOG_TYPE_DEFAULT = _pyoslog.OS_LOG_TYPE_DEFAULT
 OS_LOG_TYPE_INFO = _pyoslog.OS_LOG_TYPE_INFO

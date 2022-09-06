@@ -25,6 +25,7 @@ static PyObject *py_os_log_with_type(PyObject *self, PyObject *args) {
 
   os_log_t *log;
   int use_default = 0;
+  int log_disabled = 0;
   if (PyCapsule_IsValid(py_log, "os_log_t")) {
     if (!(log = (os_log_t *)PyCapsule_GetPointer(py_log, "os_log_t"))) {
       return NULL;
@@ -33,11 +34,15 @@ static PyObject *py_os_log_with_type(PyObject *self, PyObject *args) {
     // a hack - treat capsule errors as selecting the default log,
     // meaning we don't have to provide a constant os_log_t object
     use_default = 1;
+    if (py_log == Py_None) {
+      log_disabled = 1;
+    }
   }
 
   // TODO: can we support custom formats here? (must be constant strings)
-  os_log_with_type(use_default ? OS_LOG_DEFAULT : *log, (os_log_type_t)type,
-                   "%{public}s", log_message);
+  os_log_with_type(
+      use_default ? (log_disabled ? OS_LOG_DISABLED : OS_LOG_DEFAULT) : *log,
+      (os_log_type_t)type, "%{public}s", log_message);
   Py_RETURN_NONE;
 }
 
@@ -108,7 +113,7 @@ PyObject *PyInit__pyoslog(void) {
 
   // standard log types
   PyModule_AddIntConstant(module, "OS_LOG_TYPE_DEFAULT", OS_LOG_TYPE_DEFAULT);
-  PyModule_AddIntConstant(module, "OS_LOG_TYPE_INFO", OS_LOG_TYPE_DEFAULT);
+  PyModule_AddIntConstant(module, "OS_LOG_TYPE_INFO", OS_LOG_TYPE_INFO);
   PyModule_AddIntConstant(module, "OS_LOG_TYPE_DEBUG", OS_LOG_TYPE_DEBUG);
   PyModule_AddIntConstant(module, "OS_LOG_TYPE_ERROR", OS_LOG_TYPE_ERROR);
   PyModule_AddIntConstant(module, "OS_LOG_TYPE_FAULT", OS_LOG_TYPE_FAULT);

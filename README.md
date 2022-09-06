@@ -38,7 +38,6 @@ log = pyoslog.os_log_create('ac.robinson.pyoslog', 'custom-category')
 pyoslog.os_log_with_type(log, pyoslog.OS_LOG_TYPE_DEBUG, 'Message to log object', log, 'of type', pyoslog.OS_LOG_TYPE_DEBUG)
 ```
 
-
 ### Integration with the logging module
 Use the pyoslog `Handler` to direct messages to pyoslog:
 
@@ -54,7 +53,6 @@ logger.debug('message')
 
 To configure the Handler's output type, use `handler.setLevel` with a level from the logging module.
 These are mapped internally to the `OS_LOG_TYPE` values – for example, `handler.setLevel(logging.DEBUG)` will configure the Handler to output messages of type `OS_LOG_TYPE_DEBUG`.
-
 
 ### Receiving log messages
 Logs can be viewed using Console.app or the `log` command.
@@ -73,21 +71,30 @@ log stream --predicate 'subsystem == "ac.robinson.pyoslog"' --level=debug
 
 See `man log` for further details about the available options and filters.
 
-
 ### Handling cleanup
 When labelling subsystem and category using the native C methods there is a requirement to free the log object after use (using `os_release`).
 The pyoslog module handles this for you – there is no need to `del` or release these objects.
 
 
+## Testing
+The pyoslog module's tests require the [pyobjc OSLog framework wrappers](https://pypi.org/project/pyobjc-framework-OSLog/) in order to verify output and, as a result, can only be run on macOS 10.15 or later.
+After installing the OSLog wrappers (via `python -m pip install pyobjc-framework-OSLog`), navigate to the [tests](https://github.com/simonrob/pyoslog/tree/main/tests) directory and run:
+
+```shell
+python -m unittest
+```
+
+
 ## Alternatives
 At the time this module was created there were no alternatives available on [PyPi](https://pypi.org/search/?q=macos+unified+logging&c=Operating+System+%3A%3A+MacOS).
-There are, however, other options available if this is not seen as a constraint:
+Since then, the [macos-oslog](https://pypi.org/project/macos-oslog/) module has been released, with broadly equivalent functionality to pyoslog.
+There are also other options available if PyPi access is not seen as a constraint:
 
 - [apple_os_log_py](https://github.com/cedar101/apple_os_log_py)
 - [pymacoslog](https://github.com/douglas-carmichael/pymacoslog)
 - [loggy](https://github.com/pointy-tools/loggy)
 
-Note that the [pyobjc](https://pyobjc.readthedocs.io/) module [OSLog](https://pypi.org/project/pyobjc-framework-OSLog/) is for _reading_ from the unified logging system rather than writing to it.
+Note that the [pyobjc](https://pyobjc.readthedocs.io/) module [OSLog](https://pypi.org/project/pyobjc-framework-OSLog/) is for _reading_ from the unified logging system rather than writing to it (and as a result is used for testing pyoslog).
 A `log.h` binding is on that project's [roadmap](https://github.com/ronaldoussoren/pyobjc/issues/377), but not yet implemented. 
 
 

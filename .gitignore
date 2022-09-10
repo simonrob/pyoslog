@@ -129,7 +129,10 @@ dmypy.json
 .pyre/
 
 # Custom for this repository
-versions
-build.sh
-.idea
 *.iml
+.idea
+build.sh
+versions
+
+# duplicate of master readme (to integrate in docs)
+docs/readme.md

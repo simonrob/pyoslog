@@ -16,34 +16,122 @@ PyDoc_STRVAR(os_log_with_type_doc,
 
 static PyObject *py_os_log_with_type(PyObject *self, PyObject *args) {
   PyObject *py_log;
-  const uint8_t *type;
+  int type;
   const char *log_message;
 
-  if (!PyArg_ParseTuple(args, "Obs", &py_log, &type, &log_message)) {
+  // automatically sets an exception on failure
+  if (!PyArg_ParseTuple(args, "Ois", &py_log, &type, &log_message)) {
     return NULL;
   }
 
   os_log_t *log;
-  int use_default = 0;
+  int type_error = 0;
   int log_disabled = 0;
   if (PyCapsule_IsValid(py_log, "os_log_t")) {
     if (!(log = (os_log_t *)PyCapsule_GetPointer(py_log, "os_log_t"))) {
-      return NULL;
+      type_error = 1;
     }
   } else {
-    // a hack - treat capsule errors as selecting the default log,
-    // meaning we don't have to provide a constant os_log_t object
-    use_default = 1;
     if (py_log == Py_None) {
       log_disabled = 1;
+    } else {
+      type_error = 1;
     }
   }
 
+  if (type_error) {
+    PyErr_SetString(PyExc_TypeError,
+                    "invalid log_object - must be pyoslog.OS_LOG_DEFAULT, "
+                    "pyoslog.OS_LOG_DISABLED (== None), or an object "
+                    "initialised with os_log_create");
+    return NULL;
+  }
+
+  os_log_type_t log_type = (os_log_type_t)type;
+  switch (log_type) {
+  case OS_LOG_TYPE_DEFAULT:
+  case OS_LOG_TYPE_INFO:
+  case OS_LOG_TYPE_DEBUG:
+  case OS_LOG_TYPE_ERROR:
+  case OS_LOG_TYPE_FAULT:
+    break;
+  default:
+    PyErr_SetString(
+        PyExc_TypeError,
+        "invalid log_type - must be one of pyoslog.OS_LOG_TYPE_DEFAULT, "
+        "pyoslog.OS_LOG_TYPE_INFO, pyoslog.OS_LOG_TYPE_DEBUG, "
+        "pyoslog.OS_LOG_TYPE_ERROR or pyoslog.OS_LOG_TYPE_FAULT");
+    return NULL;
+  }
+
   // TODO: can we support custom formats here? (must be constant strings)
-  os_log_with_type(
-      use_default ? (log_disabled ? OS_LOG_DISABLED : OS_LOG_DEFAULT) : *log,
-      (os_log_type_t)type, "%{public}s", log_message);
+  // note: empty string logging is no issue, and the platform automatically
+  // truncates messages >= 1024 characters
+  os_log_with_type(log_disabled ? OS_LOG_DISABLED : *log, log_type,
+                   "%{public}s", log_message);
   Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(
+    os_log_type_enabled_doc,
+    "Returns a Boolean value that indicates whether the log can "
+    "write messages with the specified log type. See: "
+    "https://developer.apple.com/documentation/os/1643749-os_log_type_enabled");
+
+static PyObject *py_os_log_type_enabled(PyObject *self, PyObject *args) {
+  PyObject *py_log;
+  int type;
+
+  // automatically sets an exception on failure
+  if (!PyArg_ParseTuple(args, "Oi", &py_log, &type)) {
+    return NULL;
+  }
+
+  os_log_t *log;
+  int type_error = 0;
+  int log_disabled = 0;
+  if (PyCapsule_IsValid(py_log, "os_log_t")) {
+    if (!(log = (os_log_t *)PyCapsule_GetPointer(py_log, "os_log_t"))) {
+      type_error = 1;
+    }
+  } else {
+    if (py_log == Py_None) {
+      log_disabled = 1;
+    } else {
+      type_error = 1;
+    }
+  }
+
+  if (type_error) {
+    PyErr_SetString(PyExc_TypeError,
+                    "invalid log_object - must be pyoslog.OS_LOG_DEFAULT, "
+                    "pyoslog.OS_LOG_DISABLED (== None), or an object "
+                    "initialised with pyoslog.os_log_create");
+    return NULL;
+  }
+
+  os_log_type_t log_type = (os_log_type_t)type;
+  switch (log_type) {
+  case OS_LOG_TYPE_DEFAULT:
+  case OS_LOG_TYPE_INFO:
+  case OS_LOG_TYPE_DEBUG:
+  case OS_LOG_TYPE_ERROR:
+  case OS_LOG_TYPE_FAULT:
+    break;
+  default:
+    PyErr_SetString(
+        PyExc_TypeError,
+        "invalid log_type - must be one of pyoslog.OS_LOG_TYPE_DEFAULT, "
+        "pyoslog.OS_LOG_TYPE_INFO, pyoslog.OS_LOG_TYPE_DEBUG, "
+        "pyoslog.OS_LOG_TYPE_ERROR or pyoslog.OS_LOG_TYPE_FAULT");
+    return NULL;
+  }
+
+  if (os_log_type_enabled(log_disabled ? OS_LOG_DISABLED : *log, log_type)) {
+    Py_RETURN_TRUE;
+  } else {
+    Py_RETURN_FALSE;
+  }
 }
 
 static void os_log_release(PyObject *args) {
@@ -52,7 +140,9 @@ static void os_log_release(PyObject *args) {
     return;
   }
 
-  os_release(*log);
+  if (*log != OS_LOG_DEFAULT) {
+    os_release(*log);
+  }
   PyMem_Free(log);
 }
 
@@ -64,16 +154,60 @@ PyDoc_STRVAR(
 static PyObject *py_os_log_create(PyObject *self, PyObject *args) {
   const char *subsystem;
   const char *category;
+
+  // automatically sets an exception on failure
   if (!PyArg_ParseTuple(args, "ss", &subsystem, &category)) {
+    return NULL;
+  }
+
+  // subsystem length > 249 characters leads to error messages about read
+  // failures and no category value
+  int subsystem_length = strlen(subsystem);
+  if (subsystem_length <= 0) {
+    PyErr_SetString(PyExc_ValueError, "subsystem string must not be empty");
+    return NULL;
+  }
+  if (subsystem_length > 249) {
+    PyErr_SetString(
+        PyExc_ValueError,
+        "subsystem string must be less than 250 characters in length");
+    return NULL;
+  }
+
+  // category length > 254 characters leads to overflow and no category value
+  int category_length = strlen(category);
+  if (category_length <= 0) {
+    PyErr_SetString(PyExc_ValueError, "category string must not be empty");
+    return NULL;
+  }
+  if (category_length > 254) {
+    PyErr_SetString(
+        PyExc_ValueError,
+        "category string must be less than 254 characters in length");
     return NULL;
   }
 
   os_log_t *log = (os_log_t *)PyMem_Malloc(sizeof(os_log_t *));
   if (log == NULL) {
-    return NULL;
+    return PyErr_NoMemory();
   }
 
   *log = os_log_create(subsystem, category);
+  return PyCapsule_New(log, "os_log_t", os_log_release);
+}
+
+// allow use of the OS_LOG_DEFAULT object
+static PyObject *py__get_os_log_default(PyObject *self, PyObject *args) {
+  // automatically sets an exception on failure (no arguments expected)
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  os_log_t *log = (os_log_t *)PyMem_Malloc(sizeof(os_log_t *));
+  if (log == NULL) {
+    return PyErr_NoMemory();
+  }
+  *log = OS_LOG_DEFAULT;
   return PyCapsule_New(log, "os_log_t", os_log_release);
 }
 
@@ -84,10 +218,18 @@ static PyMethodDef module_methods[] = {
      .ml_meth = (PyCFunction)py_os_log_with_type,
      .ml_flags = METH_VARARGS,
      .ml_doc = os_log_with_type_doc},
+    {.ml_name = "os_log_type_enabled",
+     .ml_meth = (PyCFunction)py_os_log_type_enabled,
+     .ml_flags = METH_VARARGS,
+     .ml_doc = os_log_type_enabled_doc},
     {.ml_name = "os_log_create",
      .ml_meth = (PyCFunction)py_os_log_create,
      .ml_flags = METH_VARARGS,
      .ml_doc = os_log_create_doc},
+    {.ml_name = "_get_os_log_default",
+     .ml_meth = (PyCFunction)py__get_os_log_default,
+     .ml_flags = METH_VARARGS,
+     .ml_doc = NULL},
     {.ml_name = NULL} /* sentinel */
 };
 
@@ -102,14 +244,11 @@ static struct PyModuleDef module_definition = {.m_base = PyModuleDef_HEAD_INIT,
                                                .m_free = NULL};
 
 PyObject *PyInit__pyoslog(void) {
+  // automatically sets an exception on failure
   PyObject *module = PyModule_Create(&module_definition);
   if (module == NULL) {
     return NULL;
   }
-
-  // the default log type (no named subsystem or facility)
-  // see note above for why we don't use the actual value
-  PyModule_AddIntConstant(module, "OS_LOG_DEFAULT", 0);
 
   // standard log types
   PyModule_AddIntConstant(module, "OS_LOG_TYPE_DEFAULT", OS_LOG_TYPE_DEFAULT);

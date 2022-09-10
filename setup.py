@@ -1,6 +1,6 @@
 import os
 
-from setuptools import setup, Extension
+import setuptools
 
 NAME = 'pyoslog'
 
@@ -28,16 +28,12 @@ except ImportError:
     compatibility = imp.load_source(compatibility_module_name, compatibility_module_path)
 
 ext_modules = []
+# noinspection PyUnresolvedReferences
 if compatibility.is_supported():
-    # note: suppress clang warning about pointer to enum cast (and another on version of clang that don't have this...)
-    # (warning: cast to smaller integer type 'os_log_type_t' from 'const uint8_t *' (aka 'const unsigned char *'))
-    # os_log_type_t *is* uint8_t - see https://opensource.apple.com/source/xnu/xnu-3789.21.4/libkern/os/log.h.auto.html
-    ext_modules.append(Extension('_' + NAME, ['%s/_%s.c' % (NAME, NAME)],
-                                 extra_compile_args=['-Wno-pointer-to-enum-cast', '-Wno-unknown-warning-option']))
+    ext_modules.append(setuptools.Extension('_' + NAME, ['%s/_%s.c' % (NAME, NAME)]))
 
-# https://setuptools.pypa.io/en/latest/references/keywords.html
 # https://setuptools.pypa.io/en/latest/references/keywords.html or https://docs.python.org/3/distutils/apiref.html
-setup(
+setuptools.setup(
     name=NAME,
     version=about['__version__'],
     description=about['__description__'],
@@ -47,6 +43,7 @@ setup(
     author_email=about['__author_email__'],
     url=about['__url__'],
     project_urls={
+        'Documentation': 'https://pyoslog.readthedocs.io/',
         'Bug Tracker': '%s/issues' % about['__url__'],
         'Source Code': about['__url__'],
     },

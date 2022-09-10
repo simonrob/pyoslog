@@ -1,20 +1,6 @@
 from ctypes import py_object
 
-try:
-    import _pyoslog  # type: ignore
-except ImportError:
-    # noinspection PyPep8Naming
-    class _pyoslog:  # type: ignore
-        print('Warning: mocking _pyoslog class on an unsupported platform (use to build documentation only)')
-        _pyoslog.OS_LOG_TYPE_DEFAULT = 0
-        _pyoslog.OS_LOG_TYPE_INFO = 0
-        _pyoslog.OS_LOG_TYPE_DEBUG = 0
-        _pyoslog.OS_LOG_TYPE_ERROR = 0
-        _pyoslog.OS_LOG_TYPE_FAULT = 0
-
-        # noinspection PyMethodMayBeStatic
-        def _get_os_log_default(self):
-            return None
+import _pyoslog  # type: ignore
 
 # noinspection PyProtectedMember
 _default_log = _pyoslog._get_os_log_default()

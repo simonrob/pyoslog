@@ -7,6 +7,7 @@ import datetime
 import os
 import sys
 
+autodoc_mock_imports = ['_pyoslog']
 # noinspection PyUnresolvedReferences
 from pyoslog.handler import *  # import directly so that docs can build on unsupported platforms (e.g., Read the Docs)
 

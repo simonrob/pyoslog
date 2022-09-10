@@ -7,6 +7,9 @@ import datetime
 import os
 import sys
 
+# noinspection PyUnresolvedReferences
+from pyoslog.handler import *  # import directly so that docs can build on unsupported platforms (e.g., Read the Docs)
+
 # Make sure pyoslog's source files are detected
 sys.path.insert(0, os.path.abspath('..'))
 

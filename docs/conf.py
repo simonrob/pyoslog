@@ -7,12 +7,11 @@ import datetime
 import os
 import sys
 
-autodoc_mock_imports = ['_pyoslog']
-# noinspection PyUnresolvedReferences
-from pyoslog.handler import *  # import directly so that docs can build on unsupported platforms (e.g., Read the Docs)
-
 # Make sure pyoslog's source files are detected
 sys.path.insert(0, os.path.abspath('..'))
+
+# Force-override pyoslog.is_supported() so that we can build the documentation on unsupported platforms
+os.environ['PYOSLOG_OVERRIDE_IS_SUPPORTED'] = '1'
 
 # Get properties from __version__.py
 about = {}

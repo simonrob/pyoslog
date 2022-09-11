@@ -48,12 +48,17 @@ print('Documenting', project, version)
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx_toolbox.sidebar_links',
+    'sphinx_toolbox.github',
     'recommonmark'  # note: https://github.com/readthedocs/recommonmark/issues/177
 ]
 source_suffix = ['.rst', '.md']
 
 autodoc_member_order = 'bysource'  # note: doesn't work with inherited members: github.com/sphinx-doc/sphinx/issues/628
 autodoc_preserve_defaults = True  # better display of log() defaults
+
+github_username = 'simonrob'
+github_repository = about['__title__']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

@@ -131,7 +131,7 @@ dmypy.json
 # Custom for this repository
 *.iml
 .idea
-build.sh
+*.token
 versions
 
 # duplicate of master readme (to integrate in docs)

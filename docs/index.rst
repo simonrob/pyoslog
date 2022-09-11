@@ -12,4 +12,9 @@ Table of contents
 
     reference
 
+.. sidebar-links::
+    :caption: __
+    :github:
+    :pypi: pyoslog
+
 * :ref:`genindex`

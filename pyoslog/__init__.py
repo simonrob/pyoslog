@@ -10,5 +10,6 @@ if is_supported():
 
     del py_object
     del os_log_t
+    del Any
 
 del compatibility  # type: ignore

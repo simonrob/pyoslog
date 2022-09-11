@@ -100,7 +100,7 @@ class TestLogging(unittest.TestCase):
 
             # OS_LOG_DISABLED messages shouldn't appear, so we test the message is the same as the previous one
             sent_message = 'OS_LOG_DISABLED with type 0x%x (%s)' % (log_type.value, log_type)
-            pyoslog.os_log_with_type(pyoslog.OS_LOG_DISABLED, log_type.value, sent_message, log_type)
+            pyoslog.os_log_with_type(pyoslog.OS_LOG_DISABLED, log_type.value, sent_message)
             previous_composed_message = received_message.composedMessage()
             received_message = pyoslog_test_globals.get_latest_log_message(self.log_store)
             self.assertEqual(previous_composed_message, received_message.composedMessage())

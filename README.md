@@ -37,7 +37,7 @@ For example, the shortcut `log('message')` is equivalent to `os_log_with_type(OS
 The `Handler` class is designed for use with Python's inbuilt [logging](https://docs.python.org/3/library/logging.html) module.
 It works as a drop-in replacement for other Handler varieties.
 
-See [pyoslog's Read the Docs entry](https://pyoslog.readthedocs.io/) for a full reference. 
+See [pyoslog's method documentation](https://pyoslog.readthedocs.io/en/latest/reference.html) for a full reference. 
 
 ### Labelling subsystem and category
 Create a log object using `os_log_create` and pass it to any of the log methods to add your own subsystem and category labels:

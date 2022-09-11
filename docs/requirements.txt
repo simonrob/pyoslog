@@ -1,0 +1,3 @@
+sphinx
+sphinx-toolbox  # for GitHub and PyPi links
+recommonmark  # to import our main README.md directly

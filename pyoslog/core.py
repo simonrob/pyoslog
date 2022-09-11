@@ -1,4 +1,5 @@
 from ctypes import py_object
+from typing import Any
 
 try:
     import _pyoslog  # type: ignore
@@ -71,44 +72,44 @@ def os_log_debug_enabled(log_object: os_log_t) -> bool:
     return os_log_type_enabled(log_object, OS_LOG_TYPE_DEBUG)
 
 
-def os_log_with_type(log_object: os_log_t, log_type: int, *message: str) -> None:
+def os_log_with_type(log_object: os_log_t, log_type: int, *message: Any) -> None:
     """Sends a message at a specified level, such as default, info, debug, error or fault, to the logging system.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_with_type>`__."""
     # noinspection PyProtectedMember
     return _pyoslog.os_log_with_type(log_object._log_object, log_type, ' '.join(map(str, message)))
 
 
-def os_log(log_object: os_log_t, *message: str) -> None:
+def os_log(log_object: os_log_t, *message: Any) -> None:
     """Sends a default-level message to the logging system.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log>`__."""
     return os_log_with_type(log_object, OS_LOG_TYPE_DEFAULT, *message)
 
 
-def os_log_info(log_object: os_log_t, *message: str) -> None:
+def os_log_info(log_object: os_log_t, *message: Any) -> None:
     """Sends an info-level message to the logging system.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_info>`__."""
     return os_log_with_type(log_object, OS_LOG_TYPE_INFO, *message)
 
 
-def os_log_debug(log_object: os_log_t, *message: str) -> None:
+def os_log_debug(log_object: os_log_t, *message: Any) -> None:
     """Sends a debug-level message to the logging system.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_debug>`__."""
     return os_log_with_type(log_object, OS_LOG_TYPE_DEBUG, *message)
 
 
-def os_log_error(log_object: os_log_t, *message: str) -> None:
+def os_log_error(log_object: os_log_t, *message: Any) -> None:
     """Sends an error-level message to the logging system.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_error>`__."""
     return os_log_with_type(log_object, OS_LOG_TYPE_ERROR, *message)
 
 
-def os_log_fault(log_object: os_log_t, *message: str) -> None:
+def os_log_fault(log_object: os_log_t, *message: Any) -> None:
     """Sends a fault-level message to the logging system.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_fault>`__."""
     return os_log_with_type(log_object, OS_LOG_TYPE_FAULT, *message)
 
 
-def log(*message: str, log_object: os_log_t = OS_LOG_DEFAULT, log_type: int = OS_LOG_TYPE_DEFAULT) -> None:
+def log(*message: Any, log_object: os_log_t = OS_LOG_DEFAULT, log_type: int = OS_LOG_TYPE_DEFAULT) -> None:
     """A helper method, equivalent to :py:func:`os_log_with_type` with :py:const:`pyoslog.OS_LOG_DEFAULT` and
     :py:const:`pyoslog.OS_LOG_TYPE_DEFAULT`, but with default keyword arguments for convenience."""
     return os_log_with_type(log_object, log_type, *message)

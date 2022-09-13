@@ -11,17 +11,23 @@ from pyoslog import core as pyoslog_core
 
 print('Testing pyoslog', pkg_resources.get_distribution('pyoslog').version, 'handler')
 
-try:
-    import OSLog
-except ImportError:
-    if pyoslog.is_supported() and float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 10.15:
-        sys.exit('Error: cannot import pyobjc\'s OSLog; unable to run tests (do `pip install pyobjc-framework-OSLog`)')
-    else:
-        sys.exit('Error: pyobjc\'s OSLog is not supported on this platform (needs macOS 10.15+); unable to test output')
-
 
 class TestHandler(unittest.TestCase):
     def setUp(self):
+        try:
+            import OSLog
+        except ImportError:
+            if pyoslog.is_supported() and float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 10.15:
+                skip_reason = 'Warning: cannot import pyobjc\'s OSLog; unable to run tests (run `pip install ' \
+                              'pyobjc-framework-OSLog`)'
+                print(skip_reason)
+                raise unittest.SkipTest(skip_reason)
+            else:
+                skip_reason = 'Warning: pyobjc\'s OSLog is not supported on this platform (requires macOS 10.15+); ' \
+                              'unable to test logging Handler'
+                print(skip_reason)
+                raise unittest.SkipTest(skip_reason)
+
         self.handler = pyoslog.Handler()
         self.assertEqual(self.handler._log_object, pyoslog.OS_LOG_DEFAULT)
         self.assertEqual(self.handler._log_type, pyoslog.OS_LOG_TYPE_DEFAULT)
@@ -47,8 +53,8 @@ class TestHandler(unittest.TestCase):
         # far more thorough testing is in test_setup.py (setSubsystem essentially duplicates os_log_create)
         self.handler.setSubsystem(pyoslog_test_globals.LOG_SUBSYSTEM, pyoslog_test_globals.LOG_CATEGORY)
         self.assertIsInstance(self.handler._log_object, pyoslog_core.os_log_t)
-        self.assertEqual(str(self.handler._log_object), 'os_log_t(%s:%s)' % (pyoslog_test_globals.LOG_SUBSYSTEM,
-                                                                             pyoslog_test_globals.LOG_CATEGORY))
+        self.assertEqual(str(self.handler._log_object), '<os_log_t (%s:%s)>' % (pyoslog_test_globals.LOG_SUBSYSTEM,
+                                                                                pyoslog_test_globals.LOG_CATEGORY))
 
     def test_emit(self):
         # far more thorough testing is in test_logging.py (emit essentially duplicates os_log_with_type)

@@ -14,10 +14,10 @@ print('Testing pyoslog', pkg_resources.get_distribution('pyoslog').version, 'set
 class TestSetup(unittest.TestCase):
     def test_constants(self):
         self.assertIsInstance(pyoslog.OS_LOG_DEFAULT, pyoslog_core.os_log_t)
-        self.assertEqual(str(pyoslog.OS_LOG_DEFAULT), 'os_log_t(OS_LOG_DEFAULT)')
+        self.assertEqual(str(pyoslog.OS_LOG_DEFAULT), '<os_log_t (OS_LOG_DEFAULT)>')
 
         self.assertIsInstance(pyoslog.OS_LOG_DISABLED, pyoslog_core.os_log_t)
-        self.assertEqual(str(pyoslog.OS_LOG_DISABLED), 'os_log_t(OS_LOG_DISABLED)')
+        self.assertEqual(str(pyoslog.OS_LOG_DISABLED), '<os_log_t (OS_LOG_DISABLED)>')
 
         self.assertEqual(pyoslog.OS_LOG_TYPE_DEFAULT, pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_DEFAULT.value)
         self.assertEqual(pyoslog.OS_LOG_TYPE_INFO, pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_INFO.value)
@@ -34,8 +34,8 @@ class TestSetup(unittest.TestCase):
     def test_os_log_create(self):
         log = pyoslog.os_log_create(pyoslog_test_globals.LOG_SUBSYSTEM, pyoslog_test_globals.LOG_CATEGORY)
         self.assertIsInstance(log, pyoslog_core.os_log_t)
-        self.assertEqual(str(log), 'os_log_t(%s:%s)' % (pyoslog_test_globals.LOG_SUBSYSTEM,
-                                                        pyoslog_test_globals.LOG_CATEGORY))
+        self.assertEqual(str(log), '<os_log_t (%s:%s)>' % (pyoslog_test_globals.LOG_SUBSYSTEM,
+                                                           pyoslog_test_globals.LOG_CATEGORY))
 
         # PyArg_ParseTuple in _pyoslog.c handles type validation - just ensure a string is required and test boundaries
         self.assertRaises(TypeError, pyoslog.os_log_create, (None, None))

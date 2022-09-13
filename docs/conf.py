@@ -7,6 +7,8 @@ import datetime
 import os
 import sys
 
+from recommonmark.parser import CommonMarkParser
+
 # Make sure pyoslog's source files are detected
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -29,6 +31,12 @@ with open(os.path.join(os.path.abspath('.'), 'readme.md'), 'w') as output_file:
             lines.append(line.rstrip())
     output_file.write('\n'.join(lines))
 
+
+class CustomCommonMarkParser(CommonMarkParser):
+    def visit_document(self, node):
+        pass
+
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -42,17 +50,22 @@ release = about['__version__']
 
 print('Documenting', project, version)
 
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+def setup(app):
+    # note include recommonmark this way to work around https://github.com/readthedocs/recommonmark/issues/177
+    app.add_source_suffix('.md', 'markdown')
+    app.add_source_parser(CustomCommonMarkParser)
+
 
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx_toolbox.sidebar_links',
-    'sphinx_toolbox.github',
-    'recommonmark'  # note: https://github.com/readthedocs/recommonmark/issues/177
+    'sphinx_toolbox.github'
 ]
-source_suffix = ['.rst', '.md']
 
 autodoc_member_order = 'bysource'  # note: doesn't work with inherited members: github.com/sphinx-doc/sphinx/issues/628
 autodoc_preserve_defaults = True  # better display of log() defaults

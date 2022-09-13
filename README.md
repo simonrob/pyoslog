@@ -106,8 +106,14 @@ When labelling subsystem and category using the native C methods there is a requ
 The pyoslog module handles this for you – there is no need to `del` or release these objects.
 
 
+## Limitations
+As noted above, while the macOS `os_log` API allows use of a format string with many methods, this name is required to be a C string literal.
+As a result, pyoslog hardcodes all format strings to `"%{public}s"`.
+
+
 ## Testing
-The pyoslog module's tests require the [pyobjc OSLog framework wrappers](https://pypi.org/project/pyobjc-framework-OSLog/) in order to verify output and, as a result, can only be run on macOS 10.15 or later.
+The pyoslog module's tests require the [pyobjc OSLog framework wrappers](https://pypi.org/project/pyobjc-framework-OSLog/) and the [storeWithScope initialiser](https://developer.apple.com/documentation/oslog/oslogstore/3548057-storewithscope) in order to verify output so, as a result, can only be run on macOS 12 or later.
+
 After installing the OSLog wrappers (via `python -m pip install pyobjc-framework-OSLog`), navigate to the [tests](https://github.com/simonrob/pyoslog/tree/main/tests) directory and run:
 
 ```shell
@@ -115,12 +121,14 @@ python -m unittest
 ```
 
 Please note that if Console.app is live-streaming messages, some tests may fail.
-See [`test_logging.py`](https://github.com/simonrob/pyoslog/blob/main/tests/test_logging.py#L84) for discussion about why this is the case.
+See [`test_logging.py`](https://github.com/simonrob/pyoslog/blob/main/tests/test_logging.py#L93) for discussion about why this is the case.
 
 
 ## Alternatives
 At the time this module was created there were no alternatives available on [PyPi](https://pypi.org/search/?q=macos+unified+logging&c=Operating+System+%3A%3A+MacOS).
-Since then, the [macos-oslog](https://pypi.org/project/macos-oslog/) module has been released, with broadly equivalent functionality to pyoslog.
+Since then, the [macos-oslog](https://pypi.org/project/macos-oslog/) module has been released, with broadly equivalent functionality to pyoslog, except for the need to manually release the log object.
+There is also [os-signpost](https://pypi.org/project/os-signpost/), which uses `cython` to provide the [`OSSignposter`](https://developer.apple.com/documentation/os/ossignposter) API, and could easily be extended to provide `os_log` functionality.
+
 In addition, there are other options available if PyPi access is not seen as a constraint:
 
 - [apple_os_log_py](https://github.com/cedar101/apple_os_log_py)

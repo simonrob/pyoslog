@@ -10,21 +10,27 @@ from pyoslog import core as pyoslog_core
 
 print('Testing pyoslog', pkg_resources.get_distribution('pyoslog').version, 'logging')
 
-try:
-    import OSLog
-except ImportError:
-    if pyoslog.is_supported() and float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 10.15:
-        sys.exit('Error: cannot import pyobjc\'s OSLog; unable to run tests (do `pip install pyobjc-framework-OSLog`)')
-    else:
-        sys.exit('Error: pyobjc\'s OSLog is not supported on this platform (needs macOS 10.15+); unable to test output')
-
 
 class TestLogging(unittest.TestCase):
     def setUp(self):
+        try:
+            import OSLog
+        except ImportError:
+            if pyoslog.is_supported() and float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 10.15:
+                skip_reason = 'Warning: cannot import pyobjc\'s OSLog; unable to run tests (run `pip install ' \
+                              'pyobjc-framework-OSLog`)'
+                print(skip_reason)
+                raise unittest.SkipTest(skip_reason)
+            else:
+                skip_reason = 'Warning: pyobjc\'s OSLog is not supported on this platform (requires macOS 10.15+); ' \
+                              'unable to test os_log output'
+                print(skip_reason)
+                raise unittest.SkipTest(skip_reason)
+
         self.log = pyoslog.os_log_create(pyoslog_test_globals.LOG_SUBSYSTEM, pyoslog_test_globals.LOG_CATEGORY)
         self.assertIsInstance(self.log, pyoslog_core.os_log_t)
-        self.assertEqual(str(self.log), 'os_log_t(%s:%s)' % (pyoslog_test_globals.LOG_SUBSYSTEM,
-                                                             pyoslog_test_globals.LOG_CATEGORY))
+        self.assertEqual(str(self.log), '<os_log_t (%s:%s)>' % (pyoslog_test_globals.LOG_SUBSYSTEM,
+                                                                pyoslog_test_globals.LOG_CATEGORY))
 
         # noinspection PyUnresolvedReferences
         log_scope = OSLog.OSLogStoreScope(OSLog.OSLogStoreCurrentProcessIdentifier)

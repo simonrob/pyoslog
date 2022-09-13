@@ -48,6 +48,9 @@ setuptools.setup(
         'Source Code': about['__url__'],
     },
 
+    # 3.6+ for core.py constants inline type hints, but not enabled because we support installation on earlier versions
+    # python_requires='>=3.6',
+
     platforms=['darwin'],
     packages=[NAME],
     ext_modules=ext_modules,
@@ -57,10 +60,14 @@ setuptools.setup(
 
     license=about['__license__'],
     classifiers=[
-        'Development Status :: 4 - Beta',
         'Operating System :: MacOS',
+        'Programming Language :: Python',
+        'Programming Language :: C',
+        'Topic :: Software Development',
+        'Topic :: System :: Logging',
+        'Typing :: Typed',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python'
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: Apache Software License'
     ]
 )

@@ -120,8 +120,8 @@ After installing the OSLog wrappers (via `python -m pip install pyobjc-framework
 python -m unittest
 ```
 
-Please note that if Console.app is live-streaming messages, some tests may fail.
-See [`test_logging.py`](https://github.com/simonrob/pyoslog/blob/main/tests/test_logging.py#L93) for discussion about why this is the case.
+All of pyoslog's code is covered by tests, but please note that if Console.app is live-streaming messages, some tests may fail.
+See [`test_logging.py`](https://github.com/simonrob/pyoslog/blob/main/tests/test_logging.py#L96) for discussion about why this is the case.
 
 
 ## Alternatives

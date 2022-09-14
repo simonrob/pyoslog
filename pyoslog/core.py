@@ -3,10 +3,10 @@ from typing import Any
 
 try:
     import _pyoslog  # type: ignore
-except ImportError:
+except ImportError:  # pragma: no cover
     # noinspection PyPep8Naming
     class _pyoslog:  # type: ignore
-        print('Warning: mocking _pyoslog class on an unsupported platform (use to build documentation only)')
+        print('Warning: mocking _pyoslog class on an unsupported platform - use to build documentation only')
         OS_LOG_TYPE_DEFAULT = 0
         OS_LOG_TYPE_INFO = 0
         OS_LOG_TYPE_DEBUG = 0
@@ -40,11 +40,11 @@ OS_LOG_DEFAULT._description = '<os_log_t (OS_LOG_DEFAULT)>'
 OS_LOG_DISABLED = os_log_t(None, None, None)  # type: ignore
 OS_LOG_DISABLED._description = '<os_log_t (OS_LOG_DISABLED)>'
 
-OS_LOG_TYPE_DEFAULT: int = _pyoslog.OS_LOG_TYPE_DEFAULT
-OS_LOG_TYPE_INFO: int = _pyoslog.OS_LOG_TYPE_INFO
-OS_LOG_TYPE_DEBUG: int = _pyoslog.OS_LOG_TYPE_DEBUG
-OS_LOG_TYPE_ERROR: int = _pyoslog.OS_LOG_TYPE_ERROR
-OS_LOG_TYPE_FAULT: int = _pyoslog.OS_LOG_TYPE_FAULT
+OS_LOG_TYPE_DEFAULT = _pyoslog.OS_LOG_TYPE_DEFAULT  # type: int
+OS_LOG_TYPE_INFO = _pyoslog.OS_LOG_TYPE_INFO  # type: int
+OS_LOG_TYPE_DEBUG = _pyoslog.OS_LOG_TYPE_DEBUG  # type: int
+OS_LOG_TYPE_ERROR = _pyoslog.OS_LOG_TYPE_ERROR  # type: int
+OS_LOG_TYPE_FAULT = _pyoslog.OS_LOG_TYPE_FAULT  # type: int
 
 
 def os_log_create(subsystem: str, category: str) -> os_log_t:

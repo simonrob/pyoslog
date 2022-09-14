@@ -1,5 +1,4 @@
 import platform
-import sys
 import unittest
 
 import pkg_resources
@@ -13,17 +12,20 @@ print('Testing pyoslog', pkg_resources.get_distribution('pyoslog').version, 'log
 
 class TestLogging(unittest.TestCase):
     def setUp(self):
+        supported_macos = float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 12
         try:
             import OSLog
+            if not supported_macos:
+                raise ImportError('unsupported macOS version for testing')
         except ImportError:
-            if pyoslog.is_supported() and float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 10.15:
+            if pyoslog.is_supported() and supported_macos:
                 skip_reason = 'Warning: cannot import pyobjc\'s OSLog; unable to run tests (run `pip install ' \
                               'pyobjc-framework-OSLog`)'
                 print(skip_reason)
                 raise unittest.SkipTest(skip_reason)
             else:
-                skip_reason = 'Warning: pyobjc\'s OSLog is not supported on this platform (requires macOS 10.15+); ' \
-                              'unable to test os_log output'
+                skip_reason = 'Warning: pyobjc\'s OSLog is not fully supported on this platform (requires macOS ' \
+                              '12+); unable to test os_log output'
                 print(skip_reason)
                 raise unittest.SkipTest(skip_reason)
 
@@ -62,11 +64,15 @@ class TestLogging(unittest.TestCase):
 
     def test_os_log_info_enabled(self):
         # note that os_log_info_enabled() just calls os_log_type_enabled - more thorough testing can be found there
-        self.test_os_log_type_enabled()
+        expected_value = pyoslog.os_log_type_enabled(pyoslog.OS_LOG_DEFAULT,
+                                                     pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_INFO.value)
+        self.assertEqual(pyoslog.os_log_info_enabled(pyoslog.OS_LOG_DEFAULT), expected_value)
 
     def test_os_log_debug_enabled(self):
         # note that os_log_debug_enabled() just calls os_log_type_enabled - more thorough testing can be found there
-        self.test_os_log_type_enabled()
+        expected_value = pyoslog.os_log_type_enabled(pyoslog.OS_LOG_DEFAULT,
+                                                     pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_DEBUG.value)
+        self.assertEqual(pyoslog.os_log_debug_enabled(pyoslog.OS_LOG_DEFAULT), expected_value)
 
     def test_os_log_with_type(self):
         # PyArg_ParseTuple in _pyoslog.c handles type validation - just ensure objects are required and test boundaries
@@ -90,7 +96,7 @@ class TestLogging(unittest.TestCase):
             pyoslog.os_log_with_type(pyoslog.OS_LOG_DEFAULT, log_type.value, sent_message)
             received_message = pyoslog_test_globals.get_latest_log_message(self.log_store)
 
-            # only test types that are enabled - note that starting streaming in Console.app seems to enable all levels,
+            # only test types that are enabled - note: starting streaming in Console.app appears to enable all levels,
             # but actually starts "STREAM_LIVE" mode (see `sudo log config --status`) which makes os_log_type_enabled
             # return True for all levels, but doesn't let OSLog retrieve them - as a result, some tests will fail when
             # Console.app is live-streaming logs

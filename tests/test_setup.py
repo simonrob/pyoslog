@@ -1,3 +1,4 @@
+import os
 import platform
 import sys
 import unittest
@@ -29,7 +30,12 @@ class TestSetup(unittest.TestCase):
         # a little pointless since our platform check and that from is_supported() are identical, but no other option
         matching_platform = sys.platform == 'darwin' and sys.version_info >= (3, 0,) and float(
             '.'.join(platform.mac_ver()[0].split('.')[:2])) >= 10.12
-        self.assertEqual(matching_platform, pyoslog.is_supported())
+        self.assertEqual(pyoslog.is_supported(), matching_platform)
+
+        # a little contrived, but might as well test the documentation building special case
+        os.environ['PYOSLOG_OVERRIDE_IS_SUPPORTED'] = '1'
+        self.assertEqual(pyoslog.is_supported(), True)
+        del os.environ['PYOSLOG_OVERRIDE_IS_SUPPORTED']
 
     def test_os_log_create(self):
         log = pyoslog.os_log_create(pyoslog_test_globals.LOG_SUBSYSTEM, pyoslog_test_globals.LOG_CATEGORY)

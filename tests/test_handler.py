@@ -1,6 +1,5 @@
 import logging
 import platform
-import sys
 import unittest
 
 import pkg_resources
@@ -14,17 +13,20 @@ print('Testing pyoslog', pkg_resources.get_distribution('pyoslog').version, 'han
 
 class TestHandler(unittest.TestCase):
     def setUp(self):
+        tests_supported_macos = float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 12
         try:
             import OSLog
+            if not tests_supported_macos:
+                raise ImportError('unsupported macOS version for testing')
         except ImportError:
-            if pyoslog.is_supported() and float('.'.join(platform.mac_ver()[0].split('.')[:2])) >= 10.15:
+            if pyoslog.is_supported() and tests_supported_macos:
                 skip_reason = 'Warning: cannot import pyobjc\'s OSLog; unable to run tests (run `pip install ' \
                               'pyobjc-framework-OSLog`)'
                 print(skip_reason)
                 raise unittest.SkipTest(skip_reason)
             else:
-                skip_reason = 'Warning: pyobjc\'s OSLog is not supported on this platform (requires macOS 10.15+); ' \
-                              'unable to test logging Handler'
+                skip_reason = 'Warning: pyobjc\'s OSLog is not fully supported on this platform (requires macOS ' \
+                              '12+); unable to test logging Handler'
                 print(skip_reason)
                 raise unittest.SkipTest(skip_reason)
 

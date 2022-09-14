@@ -1,4 +1,5 @@
 import os
+import sys
 
 import setuptools
 
@@ -15,10 +16,13 @@ with open('README.md') as readme_file:
 # see compatibility.py - allow installation on older versions (or other OSs) but provide is_supported() at runtime
 compatibility_module_name = 'compatibility'
 compatibility_module_path = os.path.join(working_directory, '%s.py' % compatibility_module_name)
+is_old_python_version = sys.version_info < (3, 5,)
 try:
     # noinspection PyUnresolvedReferences
     import importlib.util
 
+    if is_old_python_version:  # importlib.util.module_from_spec wasn't always present
+        raise ImportError('importlib.util.module_from_spec is not available')
     spec = importlib.util.spec_from_file_location(compatibility_module_name, compatibility_module_path)
     compatibility = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(compatibility)
@@ -48,12 +52,12 @@ setuptools.setup(
         'Source Code': about['__url__'],
     },
 
-    # 3.6+ for core.py constants inline type hints, but not enabled because we support installation on earlier versions
-    # python_requires='>=3.6',
-
     platforms=['darwin'],
     packages=[NAME],
     ext_modules=ext_modules,
+
+    # could do, e.g., 'typing;python_version<"3.5"' but some old versions don't support that syntax...
+    install_requires=['typing'] if is_old_python_version else [],
 
     package_data={'': ['LICENSE']},
     include_package_data=True,

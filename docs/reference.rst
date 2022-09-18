@@ -56,3 +56,4 @@ Handler
 
 .. autoclass:: pyoslog.Handler
     :members:
+    :exclude-members: emit

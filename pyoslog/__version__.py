@@ -1,5 +1,5 @@
 __title__ = 'pyoslog'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __description__ = 'Send messages to the macOS unified logging system (os_log)'
 __author__ = 'Simon Robinson'
 __author_email__ = 'simon@robinson.ac'

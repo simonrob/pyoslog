@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 # this build script is quite forceful about setup - make sure not to mess up the system python
-PYTHON_VENV=$(python -c "import sys; sys.stdout.write('1') if hasattr(sys, 'real_prefix') or sys.base_prefix != sys.prefix else sys.stdout.write('0')")
+PYTHON_VENV=$(python3 -c "import sys; sys.stdout.write('1') if hasattr(sys, 'real_prefix') or sys.base_prefix != sys.prefix else sys.stdout.write('0')")
 if [ "$PYTHON_VENV" == 0 ]; then
   echo 'Warning: not running in a Python virtual environment. Please either activate a venv or edit the script to confirm this action'
   exit 1

@@ -32,7 +32,20 @@ class TestHandler(unittest.TestCase):
 
         self.handler = pyoslog.Handler()
         self.assertEqual(self.handler._log_object, pyoslog.OS_LOG_DEFAULT)
-        self.assertEqual(self.handler._log_type, pyoslog.OS_LOG_TYPE_DEFAULT)
+        self.assertEqual(self.handler.level, logging.NOTSET)
+
+        # far more thorough testing is in test_setup.py (setSubsystem essentially duplicates os_log_create)
+        self.handler.setSubsystem(pyoslog_test_globals.LOG_SUBSYSTEM, pyoslog_test_globals.LOG_CATEGORY)
+        self.assertIsInstance(self.handler._log_object, pyoslog_core.os_log_t)
+        self.assertEqual(str(self.handler._log_object), '<os_log_t (%s:%s)>' % (pyoslog_test_globals.LOG_SUBSYSTEM,
+                                                                                pyoslog_test_globals.LOG_CATEGORY))
+
+        self.logger = logging.getLogger('Pyoslog test logger')
+        self.logger.addHandler(self.handler)
+
+        # so that we don't receive framework messages (e.g., 'PlugIn CFBundle 0x122f9cf90 </System/Library/Frameworks/
+        # OSLog.framework> (framework, loaded) is now unscheduled for unloading')
+        self.logger.setLevel(logging.DEBUG)
 
         # noinspection PyUnresolvedReferences
         log_scope = OSLog.OSLogStoreScope(OSLog.OSLogStoreCurrentProcessIdentifier)
@@ -40,30 +53,59 @@ class TestHandler(unittest.TestCase):
         self.log_store, error = OSLog.OSLogStore.storeWithScope_error_(log_scope, None)
         self.assertIsNone(error)
 
-    def test_setLevel(self):
-        for invalid_type in [None, [], (0, 1, 2), {'key': 'value'}]:
-            self.assertRaises(TypeError, self.handler.setLevel, invalid_type)
-
-        for level in [logging.NOTSET, logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]:
-            self.handler.setLevel(level)
-            self.assertEqual(self.handler._log_type, pyoslog_test_globals.logging_level_to_type(level))
-
-            self.handler.setLevel(level + 5)  # the logging module allows any positive integers, default 0-50
-            self.assertEqual(self.handler._log_type, pyoslog_test_globals.logging_level_to_type(level))
-
-    def test_setSubsystem(self):
-        # far more thorough testing is in test_setup.py (setSubsystem essentially duplicates os_log_create)
-        self.handler.setSubsystem(pyoslog_test_globals.LOG_SUBSYSTEM, pyoslog_test_globals.LOG_CATEGORY)
-        self.assertIsInstance(self.handler._log_object, pyoslog_core.os_log_t)
-        self.assertEqual(str(self.handler._log_object), '<os_log_t (%s:%s)>' % (pyoslog_test_globals.LOG_SUBSYSTEM,
-                                                                                pyoslog_test_globals.LOG_CATEGORY))
-
     def test_emit(self):
-        # far more thorough testing is in test_logging.py (emit essentially duplicates os_log_with_type)
-        sent_record = logging.LogRecord('test', logging.DEBUG, '', 0, 'Handler log message', None, None)
-        self.handler.emit(sent_record)
+        logging_methods = [
+            (self.logger.debug, pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_DEBUG),
+            (self.logger.info, pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_INFO),
+            (self.logger.warning, pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_DEFAULT),
+            (self.logger.error, pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_ERROR),
+            (self.logger.critical, pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_FAULT)
+        ]
+        for log_method, log_type in logging_methods:
+            sent_message = 'Handler message via %s / 0x%x (%s)' % (log_method, log_type.value, log_type)
+            log_method(sent_message)
+            received_message = pyoslog_test_globals.get_latest_log_message(self.log_store)
+
+            # see test_logging.py for further details about this approach
+            if pyoslog.os_log_type_enabled(self.handler._log_object, log_type.value):
+                self.assertEqual(pyoslog_test_globals.oslog_level_to_type(received_message.level()), log_type)
+                self.assertEqual(received_message.subsystem(), pyoslog_test_globals.LOG_SUBSYSTEM)
+                self.assertEqual(received_message.category(), pyoslog_test_globals.LOG_CATEGORY)
+                self.assertEqual(received_message.composedMessage(), sent_message)
+            else:
+                print('Skipped: custom log object Handler tests with disabled type 0x%x (%s)' % (
+                    log_type.value, log_type))
+
+        sent_message = 'Handler message via logger.exception()'
+        self.logger.exception(sent_message, exc_info=False)  # intended to only be called from an exception
         received_message = pyoslog_test_globals.get_latest_log_message(self.log_store)
-        self.assertEqual(received_message.composedMessage(), sent_record.message)
+        self.assertEqual(pyoslog_test_globals.oslog_level_to_type(received_message.level()),
+                         pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_ERROR)
+        self.assertEqual(received_message.subsystem(), pyoslog_test_globals.LOG_SUBSYSTEM)
+        self.assertEqual(received_message.category(), pyoslog_test_globals.LOG_CATEGORY)
+        self.assertEqual(received_message.composedMessage(), sent_message)
+
+        # logging.NOTSET should map to OS_LOG_TYPE_DEFAULT (but we don't test output as explained above)
+        self.assertEqual(self.handler._get_pyoslog_type(logging.NOTSET),
+                         pyoslog_test_globals.TestLogTypes.OS_LOG_TYPE_DEFAULT)
+
+        logging_levels = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
+        for log_level in logging_levels:
+            expected_type = pyoslog_test_globals.logging_level_to_type(log_level)
+            sent_message = 'Handler message via logger.log() at level %d / 0x%x (%s)' % (
+                log_level, expected_type.value, expected_type)
+            self.logger.log(log_level, sent_message)
+            received_message = pyoslog_test_globals.get_latest_log_message(self.log_store)
+
+            # see test_logging.py for further details about this approach
+            if pyoslog.os_log_type_enabled(self.handler._log_object, expected_type.value):
+                self.assertEqual(pyoslog_test_globals.oslog_level_to_type(received_message.level()), expected_type)
+                self.assertEqual(received_message.subsystem(), pyoslog_test_globals.LOG_SUBSYSTEM)
+                self.assertEqual(received_message.category(), pyoslog_test_globals.LOG_CATEGORY)
+                self.assertEqual(received_message.composedMessage(), sent_message)
+            else:
+                print('Skipped: custom log object Handler tests with disabled type 0x%x (%s)' % (
+                    expected_type.value, expected_type))
 
 
 if __name__ == '__main__':

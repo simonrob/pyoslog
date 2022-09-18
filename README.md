@@ -21,7 +21,15 @@ Please note that if `is_supported()` returns `False` then none of the module's o
 
 
 ## Usage
-Pyoslog currently provides the following methods:
+
+```python
+import pyoslog
+if pyoslog.is_supported():
+    pyoslog.log('This is an OS_LOG_TYPE_DEFAULT message via pyoslog')
+```
+
+### Available methods
+Pyoslog provides the following methods from Apple's [unified logging header](https://opensource.apple.com/source/xnu/xnu-3789.21.4/libkern/os/log.h.auto.html):
 - [`os_log_create`](https://developer.apple.com/documentation/os/1643744-os_log_create)
 - [`os_log_type_enabled`](https://developer.apple.com/documentation/os/1643749-os_log_type_enabled) (and [`info`](https://developer.apple.com/documentation/os/os_log_info_enabled)/[`debug`](https://developer.apple.com/documentation/os/os_log_debug_enabled) variants)
 - [`os_log_with_type`](https://developer.apple.com/documentation/os/os_log_with_type)
@@ -73,16 +81,14 @@ Use the pyoslog `Handler` to direct messages to pyoslog:
 
 ```python
 import logging, pyoslog
-logger = logging.getLogger('My app name')
-logger.setLevel(logging.DEBUG)
 handler = pyoslog.Handler()
 handler.setSubsystem('org.example.your-app', 'filter-category')
+logger = logging.getLogger()
 logger.addHandler(handler)
-logger.debug('message')
+logger.error('message')
 ```
 
-To configure the Handler's output type, use `handler.setLevel` with a level from the logging module.
-These are mapped internally to the `OS_LOG_TYPE` values – for example, `handler.setLevel(logging.DEBUG)` will configure the Handler to output messages of type `OS_LOG_TYPE_DEBUG`.
+Logger levels are mapped internally to the `OS_LOG_TYPE_*` values – for example, `logger.debug('message')` will generate a message of type `OS_LOG_TYPE_DEBUG`.
 
 ### Receiving log messages
 Logs can be viewed using Console.app or the `log` command.
@@ -107,7 +113,7 @@ The pyoslog module handles this for you – there is no need to `del` or release
 
 
 ## Limitations
-As noted above, while the macOS `os_log` API allows use of a format string with many methods, this name is required to be a C string literal.
+As noted above, while the macOS `os_log` API allows use of a format string with many methods, this parameter is required to be a C string literal.
 As a result, pyoslog hardcodes all format strings to `"%{public}s"`.
 
 

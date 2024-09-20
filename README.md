@@ -62,9 +62,9 @@ Log output can be enabled or disabled globally by switching between the desired 
 ```python
 import pyoslog
 log = pyoslog.OS_LOG_DEFAULT
-pyoslog.os_log(log, 'Log output enabled')
+pyoslog.os_log(log, 'Log output enabled')  # will appear in the unified log
 log = pyoslog.OS_LOG_DISABLED
-pyoslog.os_log(log, 'Log output disabled')
+pyoslog.os_log(log, 'Log output disabled')  # will not appear in the unified log
 ```
 
 It is also possible to check whether individual log types are enabled for a particular log object:
@@ -74,7 +74,7 @@ import pyoslog
 pyoslog.os_log_type_enabled(pyoslog.OS_LOG_DEFAULT, pyoslog.OS_LOG_TYPE_DEBUG)
 ```
 
-It is not possible to directly set a log object's mode from Python, but see the `config` section of `man log` for documentation about doing this in `sudo` mode.
+It is not possible to directly set a log object's mode from Python, but see the [`config` section of `man log`](https://keith.github.io/xcode-man-pages/log.1.html#config) for documentation about doing this in `sudo` mode.
 
 ### Integration with the logging module
 Use the pyoslog `Handler` to direct messages to pyoslog:
@@ -105,10 +105,10 @@ For example, to receive messages from the labelled subsystem used in the example
 log stream --predicate 'subsystem == "ac.robinson.pyoslog"' --level debug
 ```
 
-See `man log` for further details about the available options and filters.
+See the `log` tool's manpages (`man log` or [online](https://keith.github.io/xcode-man-pages/log.1.html)) for further details about the available options and filters.
 
 ### Handling cleanup
-When labelling subsystem and category using the native C methods there is a requirement to free the log object after use (using `os_release`).
+When labelling subsystem and category using the native C methods there is a requirement to free the log object after use (using [`os_release`](https://developer.apple.com/documentation/os/1524245-os_release)).
 The pyoslog module handles this for you – there is no need to `del` or release these objects.
 
 
@@ -127,15 +127,15 @@ python -m unittest
 ```
 
 All of pyoslog's code is covered by tests, but please note that if Console.app is live-streaming messages, some tests may fail.
-See [`test_logging.py`](https://github.com/simonrob/pyoslog/blob/main/tests/test_logging.py#L96) for discussion about why this is the case.
+See [`test_logging.py`](https://github.com/simonrob/pyoslog/blob/main/tests/test_logging.py#L99) for discussion about why this is the case.
 
 
 ## Alternatives
-At the time this module was created there were no alternatives available on [PyPi](https://pypi.org/search/?q=macos+unified+logging&c=Operating+System+%3A%3A+MacOS).
+At the time this module was created there were no alternatives available on [PyPI](https://pypi.org/search/?q=macos+unified+logging&c=Operating+System+%3A%3A+MacOS).
 Since then, the [macos-oslog](https://pypi.org/project/macos-oslog/) module has been released, with broadly equivalent functionality to pyoslog, except for the need to manually release the log object.
 There is also [os-signpost](https://pypi.org/project/os-signpost/), which uses `cython` to provide the [`OSSignposter`](https://developer.apple.com/documentation/os/ossignposter) API, and could easily be extended to provide `os_log` functionality.
 
-In addition, there are other options available if PyPi access is not seen as a constraint:
+In addition, there are other options available if PyPI access is not seen as a constraint:
 
 - [apple_os_log_py](https://github.com/cedar101/apple_os_log_py)
 - [pymacoslog](https://github.com/douglas-carmichael/pymacoslog)

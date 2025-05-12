@@ -1,5 +1,5 @@
 from ctypes import py_object
-from typing import Any
+from typing import Any, Optional
 
 try:
     import _pyoslog  # type: ignore
@@ -24,7 +24,12 @@ _os_log_t_native_type = py_object
 
 # noinspection PyPep8Naming
 class os_log_t:
-    def __init__(self, log_object: _os_log_t_native_type, subsystem: str, category: str) -> None:
+    def __init__(
+        self,
+        log_object: _os_log_t_native_type,
+        subsystem: Optional[str],
+        category: Optional[str],
+    ) -> None:
         self._log_object = log_object
         self._subsystem = subsystem
         self._category = category

@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from .core import *
 
@@ -10,10 +11,28 @@ class Handler(logging.Handler):
     """This logging Handler forwards all messages to pyoslog. The logging level (set as normal via :py:func:`setLevel`)
     is converted to the matching pyoslog.OS_LOG_TYPE_* type, and messages outputted to the unified log."""
 
-    def __init__(self) -> None:
-        """Initialise a Handler instance, logging to OS_LOG_DEFAULT at OS_LOG_TYPE_DEFAULT"""
+    def __init__(
+        self, subsystem: Optional[str] = None, category: Optional[str] = None
+    ) -> None:
+        """Initialise a Handler instance.
+
+        If a subsystem is provided, a custom os_log object is created using that subsystem.
+        If a category is also provided, it will be used; otherwise, 'default' is used as the category name.
+        If no subsystem is provided, OS_LOG_DEFAULT is used, and the category parameter is ignored.
+
+        Args:
+            subsystem (Optional[str]): The subsystem for os_log (e.g., 'com.example.myapp').
+                                       If None, OS_LOG_DEFAULT is used.
+            category (Optional[str]): The category for os_log. Used only if subsystem is not None.
+                                      Defaults to 'default' if subsystem is provided but category is None.
+        """
         logging.Handler.__init__(self)
-        self._log_object = OS_LOG_DEFAULT
+        if subsystem is not None:
+            self._log_object = os_log_create(
+                subsystem, category if category is not None else 'default'
+            )
+        else:
+            self._log_object = OS_LOG_DEFAULT
 
     @staticmethod
     def _get_pyoslog_type(level: int) -> int:

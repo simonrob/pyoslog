@@ -36,6 +36,27 @@ class TestHandler(unittest.TestCase):
                 print(skip_reason)
                 raise unittest.SkipTest(skip_reason)
 
+        subsystem_handler = pyoslog.Handler(
+            subsystem=pyoslog_test_globals.LOG_SUBSYSTEM
+        )
+        self.assertIsInstance(subsystem_handler._log_object, pyoslog_core.os_log_t)
+        self.assertEqual(str(subsystem_handler._log_object), '<os_log_t (%s:%s)>' % (pyoslog_test_globals.LOG_SUBSYSTEM,
+                                                                                     'default'))
+        self.assertEqual(subsystem_handler.level, logging.NOTSET)
+
+        category_handler = pyoslog.Handler(
+            subsystem=pyoslog_test_globals.LOG_SUBSYSTEM,
+            category=pyoslog_test_globals.LOG_CATEGORY,
+        )
+        self.assertIsInstance(category_handler._log_object, pyoslog_core.os_log_t)
+        self.assertEqual(str(category_handler._log_object), '<os_log_t (%s:%s)>' % (pyoslog_test_globals.LOG_SUBSYSTEM,
+                                                                                    pyoslog_test_globals.LOG_CATEGORY),)
+        self.assertEqual(category_handler.level, logging.NOTSET)
+
+        # specifying a category without a subsystem is ignored
+        no_subsystem_handler = pyoslog.Handler(category=pyoslog_test_globals.LOG_CATEGORY)
+        self.assertEqual(no_subsystem_handler._log_object, pyoslog.OS_LOG_DEFAULT)
+
         self.handler = pyoslog.Handler()
         self.assertEqual(self.handler._log_object, pyoslog.OS_LOG_DEFAULT)
         self.assertEqual(self.handler.level, logging.NOTSET)

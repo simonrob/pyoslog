@@ -108,7 +108,7 @@ class TestLogging(unittest.TestCase):
             # Console.app is live-streaming logs
             if pyoslog.os_log_type_enabled(pyoslog.OS_LOG_DEFAULT, log_type.value):
                 self.assertIn('_pyoslog', received_message.sender())
-                self.assertIn('python', received_message.process())
+                self.assertIn('python', received_message.process().lower())
                 self.assertEqual(pyoslog_test_globals.oslog_level_to_type(received_message.level()), log_type)
                 self.assertIsNone(received_message.subsystem())
                 self.assertIsNone(received_message.category())
@@ -133,7 +133,7 @@ class TestLogging(unittest.TestCase):
             # (but not via Python) and viewed via, e.g., `sudo log config --status --subsystem 'ac.robinson.pyoslog'`
             if pyoslog.os_log_type_enabled(self.log, log_type.value):
                 self.assertIn('_pyoslog', received_message.sender())
-                self.assertIn('python', received_message.process())
+                self.assertIn('python', received_message.process().lower())
                 self.assertEqual(pyoslog_test_globals.oslog_level_to_type(received_message.level()), log_type)
                 self.assertEqual(received_message.subsystem(), pyoslog_test_globals.LOG_SUBSYSTEM)
                 self.assertEqual(received_message.category(), pyoslog_test_globals.LOG_CATEGORY)

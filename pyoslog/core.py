@@ -17,7 +17,7 @@ except ImportError:  # pragma: no cover
         def _get_os_log_default():
             return None
 
-# noinspection PyProtectedMember
+# noinspection PyProtectedMember,PyNoneFunctionAssignment
 _default_log = _pyoslog._get_os_log_default()
 _os_log_t_native_type = py_object
 
@@ -50,13 +50,14 @@ OS_LOG_TYPE_FAULT = _pyoslog.OS_LOG_TYPE_FAULT  # type: int
 def os_log_create(subsystem: str, category: str) -> os_log_t:
     """Creates a custom log object.
     See the `native method documentation <https://developer.apple.com/documentation/os/1643744-os_log_create>`_."""
+    # noinspection PyUnresolvedReferences
     return os_log_t(_pyoslog.os_log_create(subsystem, category), subsystem, category)
 
 
 def os_log_type_enabled(log_object: os_log_t, log_type: int) -> bool:
     """Returns a `bool` value that indicates whether the log can write messages with the specified log type. See the
     `native method documentation <https://developer.apple.com/documentation/os/1643749-os_log_type_enabled>`__."""
-    # noinspection PyProtectedMember
+    # noinspection PyProtectedMember,PyUnresolvedReferences
     return _pyoslog.os_log_type_enabled(log_object._log_object, log_type)
 
 
@@ -75,7 +76,7 @@ def os_log_debug_enabled(log_object: os_log_t) -> bool:
 def os_log_with_type(log_object: os_log_t, log_type: int, *message: Any) -> None:
     """Sends a message at a specified level, such as default, info, debug, error or fault, to the logging system.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_with_type>`__."""
-    # noinspection PyProtectedMember
+    # noinspection PyProtectedMember,PyUnresolvedReferences
     return _pyoslog.os_log_with_type(log_object._log_object, log_type, ' '.join(map(str, message)))
 
 

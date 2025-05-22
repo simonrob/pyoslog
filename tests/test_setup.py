@@ -3,13 +3,19 @@ import platform
 import sys
 import unittest
 
-import pkg_resources
+import packaging.version
+
+try:
+    import importlib.metadata as importlib_metadata  # get package version numbers - available in stdlib from python 3.8
+except ImportError:
+    # noinspection PyUnresolvedReferences
+    import importlib_metadata
 
 import pyoslog
 import pyoslog_test_globals
 from pyoslog import core as pyoslog_core
 
-print('Testing pyoslog', pkg_resources.get_distribution('pyoslog').version, 'setup')
+print('Testing pyoslog', packaging.version.Version(importlib_metadata.version('pyoslog')), 'setup')
 
 
 class TestSetup(unittest.TestCase):

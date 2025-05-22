@@ -27,7 +27,8 @@ try:
     compatibility = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(compatibility)
 except ImportError:
-    import imp
+    # noinspection PyUnresolvedReferences
+    import imp  # removed in python 3.12, but newer versions will have importlib, so not an issue
 
     compatibility = imp.load_source(compatibility_module_name, compatibility_module_path)
 
@@ -71,7 +72,6 @@ setuptools.setup(
         'Topic :: System :: Logging',
         'Typing :: Typed',
         'Intended Audience :: Developers',
-        'Development Status :: 5 - Production/Stable',
-        'License :: OSI Approved :: Apache Software License'
+        'Development Status :: 5 - Production/Stable'
     ]
 )

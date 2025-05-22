@@ -2,13 +2,19 @@ import logging
 import platform
 import unittest
 
-import pkg_resources
+import packaging.version
+
+try:
+    import importlib.metadata as importlib_metadata  # get package version numbers - available in stdlib from python 3.8
+except ImportError:
+    # noinspection PyUnresolvedReferences
+    import importlib_metadata
 
 import pyoslog
 import pyoslog_test_globals
 from pyoslog import core as pyoslog_core
 
-print('Testing pyoslog', pkg_resources.get_distribution('pyoslog').version, 'handler')
+print('Testing pyoslog', packaging.version.Version(importlib_metadata.version('pyoslog')), 'handler')
 
 
 class TestHandler(unittest.TestCase):
@@ -64,6 +70,7 @@ class TestHandler(unittest.TestCase):
         for log_method, log_type in logging_methods:
             sent_message = 'Handler message via %s / 0x%x (%s)' % (log_method, log_type.value, log_type)
             log_method(sent_message)
+            # noinspection DuplicatedCode
             received_message = pyoslog_test_globals.get_latest_log_message(self.log_store)
 
             # see test_logging.py for further details about this approach
@@ -95,6 +102,7 @@ class TestHandler(unittest.TestCase):
             sent_message = 'Handler message via logger.log() at level %d / 0x%x (%s)' % (
                 log_level, expected_type.value, expected_type)
             self.logger.log(log_level, sent_message)
+            # noinspection DuplicatedCode
             received_message = pyoslog_test_globals.get_latest_log_message(self.log_store)
 
             # see test_logging.py for further details about this approach

@@ -63,7 +63,7 @@ for i in "${versions[@]}"; do
   # > sudo log config --mode 'level:debug'
   # (the system mode can be restored to default afterwards via: `sudo log config --mode 'level:default'`)
   printf '\nRunning tests and checking coverage for %s…\n' "$module"
-  if [ "$i" == '36' ] || [ "$i" == '38' ]; then
+  if [ "$i" == '36' ] || [ "$i" == '37' ] || [ "$i" == '38' ]; then
     printf '\nSkipping tests for Python %s due to PyObjC incompatibility\n' "$i"
   else
     $python_binary -m pip install --quiet pyobjc-framework-OSLog # separated from other installations because it will fail on unsupported platforms

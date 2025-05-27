@@ -12,7 +12,7 @@ class Handler(logging.Handler):
     is converted to the matching pyoslog.OS_LOG_TYPE_* type, and messages outputted to the unified log."""
 
     def __init__(
-        self, subsystem: Optional[str] = None, category: str = 'default'
+            self, subsystem: Optional[str] = None, category: str = 'default'
     ) -> None:
         """Initialise a Handler instance, logging at OS_LOG_TYPE_DEFAULT
 

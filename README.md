@@ -9,7 +9,7 @@ os_log(OS_LOG_DEFAULT, 'Hello from Python!')
 
 ## Installation
 Pyoslog requires macOS 10.12 or later and Python 3.6 or later.
-Install using `pip`:
+Install from [PyPI](https://pypi.org/project/pyoslog/) using `pip`:
 
 ```shell
 python -m pip install pyoslog

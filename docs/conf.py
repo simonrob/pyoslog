@@ -69,6 +69,7 @@ extensions = [
 
 autodoc_member_order = 'bysource'  # note: doesn't work with inherited members: github.com/sphinx-doc/sphinx/issues/628
 autodoc_preserve_defaults = True  # better display of log() defaults
+autoclass_content = 'both'  # append __init__ docstrings to class docstrings (for Handler)
 
 github_username = 'simonrob'
 github_repository = about['__title__']

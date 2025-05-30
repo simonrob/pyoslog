@@ -55,20 +55,20 @@ def os_log_create(subsystem: str, category: str) -> os_log_t:
 
 
 def os_log_type_enabled(log_object: os_log_t, log_type: int) -> bool:
-    """Returns a `bool` value that indicates whether the log can write messages with the specified log type. See the
+    """Returns a ``bool`` value that indicates whether the log can write messages with the specified log type. See the
     `native method documentation <https://developer.apple.com/documentation/os/1643749-os_log_type_enabled>`__."""
     # noinspection PyProtectedMember,PyUnresolvedReferences
     return _pyoslog.os_log_type_enabled(log_object._log_object, log_type)
 
 
 def os_log_info_enabled(log_object: os_log_t) -> bool:
-    """Returns a `bool` value that indicates whether info-level logging is enabled for a specified log object.
+    """Returns a ``bool`` value that indicates whether info-level logging is enabled for a specified log object.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_info_enabled>`__."""
     return os_log_type_enabled(log_object, OS_LOG_TYPE_INFO)
 
 
 def os_log_debug_enabled(log_object: os_log_t) -> bool:
-    """Returns a `bool` value that indicates whether debug-level logging is enabled for a specified log object.
+    """Returns a ``bool`` value that indicates whether debug-level logging is enabled for a specified log object.
     See the `native method documentation <https://developer.apple.com/documentation/os/os_log_debug_enabled>`__."""
     return os_log_type_enabled(log_object, OS_LOG_TYPE_DEBUG)
 
